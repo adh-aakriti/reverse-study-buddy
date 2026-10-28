@@ -18,4 +18,4 @@ collects emails for a pilot with secondary schools (ESO/Bachillerato).
 - Keep EN and ES copy in sync (I18N object in index.html).
 - Do not call the product an "AI tutor"; the student teaches, the AI learns.
 - Product name: StudyBuddy.
-- Placeholders still to fill: [TEAM NAME], CONTACT@EXAMPLE.COM.
+- Placeholders still to fill: [TEAM NAME] / [NOMBRE DEL EQUIPO].
