@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reverse Study Buddy: tell me what I missed</title>
+<meta name="description" content="A study buddy who was absent today. Students tell it what happened in class, out loud and from memory. Teachers see which ideas stuck. Join the pilot list for secondary schools.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light dark;
+  --paper: #FDFDFB;
+  --ink: #17181C;
+  --muted: #565A63;
+  --line: #DCDCD5;
+  --hi: #FFE45C;
+  --hi-ink: #17181C;
+  --err: #B42318;
+  --serif: "Literata", Georgia, "Times New Roman", serif;
+  --sans: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #141517;
+    --ink: #ECECEA;
+    --muted: #A8ACB4;
+    --line: #33353A;
+    --hi: #6B5C00;
+    --hi-ink: #FFFFFF;
+    --err: #FF9E94;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.125rem/1.65 var(--sans); }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 3px; }
+.skip { position: absolute; left: -999px; top: 0; background: var(--ink); color: var(--paper); padding: .6rem 1rem; z-index: 20; }
+.skip:focus { left: 0; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+h1, h2 { font-family: var(--serif); font-weight: 600; margin: 0; letter-spacing: -.02em; }
+p { margin: 0 0 1.1rem; }
+a { color: var(--ink); text-underline-offset: 3px; }
+
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.mark { font-family: var(--serif); font-weight: 600; font-size: 1.1rem; text-decoration: none; }
+.right { display: flex; align-items: center; gap: 1.5rem; }
+.lang { display: flex; gap: .25rem; }
+.lang button { font: 700 .9rem var(--sans); background: transparent; color: var(--muted); border: 0; padding: .4rem .55rem; min-width: 44px; min-height: 44px; cursor: pointer; border-radius: 6px; }
+.lang button[aria-pressed="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
+
+.btn { display: inline-block; font: 700 1.05rem var(--sans); background: var(--ink); color: var(--paper); border: 0; border-radius: 6px; padding: .85rem 1.5rem; min-height: 48px; cursor: pointer; text-decoration: none; }
+.btn:hover { opacity: .88; }
+.btn[disabled] { opacity: .6; cursor: progress; }
+
+/* Hero */
+.hero { padding: 3.5rem 0 6rem; }
+.hero .wrap { display: grid; grid-template-columns: 1.1fr 1fr; gap: 5rem; align-items: center; }
+h1 { font-size: clamp(3rem, 7.2vw, 6rem); line-height: .96; margin-bottom: 1.75rem; letter-spacing: -.035em; }
+.lede { font-size: 1.3rem; line-height: 1.55; max-width: 31rem; margin-bottom: 2rem; }
+.actions { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.small { color: var(--muted); font-size: .975rem; max-width: 30rem; }
+
+/* The one bold element: the conversation as type */
+.talk { border-left: 3px solid var(--ink); padding-left: 2rem; margin: 0; }
+.say { margin: 0 0 1.75rem; opacity: 0; animation: show .5s ease forwards; }
+.say:nth-child(1) { animation-delay: .4s; }
+.say:nth-child(2) { animation-delay: 1.6s; }
+.say:nth-child(3) { animation-delay: 3.2s; }
+.say:nth-child(4) { animation-delay: 4.6s; margin-bottom: 0; }
+.say b { display: block; font: 700 .9rem var(--sans); color: var(--muted); margin-bottom: .15rem; }
+.say span { font-family: var(--serif); font-size: clamp(1.35rem, 2.3vw, 1.8rem); line-height: 1.3; letter-spacing: -.01em; }
+.say.buddy span { color: var(--muted); }
+mark { background: var(--hi); color: var(--hi-ink); padding: .02em .12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.cap { color: var(--muted); font-size: .9rem; margin: 2rem 0 0; max-width: 28rem; }
+@keyframes show { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Sections */
+section { border-top: 1px solid var(--line); padding: 4.5rem 0; }
+.row { display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; }
+.row > * { min-width: 0; }
+h2 { font-size: 1.7rem; line-height: 1.2; }
+.prose { max-width: 38rem; }
+.prose p:last-child { margin-bottom: 0; }
+ul.how { list-style: none; margin: 0 0 2rem; padding: 0; max-width: 38rem; }
+.how li { margin-bottom: 1.25rem; }
+.how strong { font-weight: 700; }
+
+table { border-collapse: collapse; width: 100%; max-width: 38rem; font-variant-numeric: tabular-nums; }
+caption { text-align: left; font-family: var(--serif); font-weight: 600; font-size: 1.15rem; padding-bottom: .4rem; }
+th, td { text-align: left; padding: .6rem 0; border-bottom: 1px solid var(--line); font-size: 1rem; }
+thead th { font-weight: 700; color: var(--muted); font-size: .9rem; border-bottom: 2px solid var(--ink); }
+td:last-child, th:last-child { text-align: right; }
+tr.mistake td { font-weight: 700; }
+.tnote { color: var(--muted); font-size: .9rem; margin-top: .75rem; max-width: 38rem; }
+
+.big { font-family: var(--serif); font-size: clamp(1.5rem, 2.7vw, 2.1rem); line-height: 1.22; letter-spacing: -.02em; margin-bottom: .8rem; }
+.bet { font-family: var(--serif); font-size: 1.3rem; line-height: 1.4; max-width: 36rem; margin: 0 0 3rem; }
+/* Per-student table */
+.tscroll { overflow-x: auto; max-width: 100%; position: relative; }
+table.cls { max-width: none; min-width: 34rem; }
+.cls th, .cls td { text-align: center; padding-left: .75rem; padding-right: .75rem; }
+.cls thead th { line-height: 1.3; }
+.cls th:first-child, .cls td:first-child { text-align: left; padding-left: 0; }
+.cls th:last-child, .cls td:last-child { text-align: left; }
+.cls tbody th, .cls tfoot th { font-weight: 700; color: var(--ink); font-size: 1rem; }
+.cls thead th { vertical-align: bottom; }
+.cls tfoot td, .cls tfoot th { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700; }
+.cls td.muted { text-align: left; color: var(--muted); }
+.cls .none-cell { color: var(--muted); }
+.dot { display: inline-block; width: .95rem; height: .95rem; border-radius: 50%; border: 2px solid var(--ink); vertical-align: -2px; }
+.dot.full { background: var(--ink); }
+.dot.part { background: linear-gradient(90deg, var(--ink) 50%, transparent 50%); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.legend { color: var(--muted); font-size: .9rem; margin-top: .9rem; }
+.legend .dot { margin-left: .9rem; }
+.legend .dot:first-child { margin-left: 0; }
+
+/* Form */
+.field { margin-bottom: 1.1rem; max-width: 26rem; }
+label { display: block; font-weight: 700; font-size: 1rem; margin-bottom: .3rem; }
+input[type="email"], select { width: 100%; font: inherit; color: var(--ink); background: var(--paper); border: 1.5px solid var(--ink); border-radius: 6px; padding: .65rem .8rem; min-height: 48px; }
+.check { display: flex; gap: .7rem; align-items: flex-start; font-size: 1rem; margin: 1.3rem 0 1.5rem; max-width: 30rem; }
+.check input { width: 1.3rem; height: 1.3rem; margin-top: .2rem; flex: none; accent-color: var(--ink); }
+.check label { font-weight: 400; margin: 0; }
+.status { min-height: 1.7rem; margin-top: 1rem; font-weight: 700; }
+.status.err { color: var(--err); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+footer { border-top: 1px solid var(--line); padding: 2.5rem 0 3.5rem; color: var(--muted); font-size: .95rem; }
+footer p { max-width: 44rem; }
+footer .foot { margin-top: 1.5rem; margin-bottom: 0; }
+
+@media (max-width: 900px) {
+  .hero .wrap, .row { grid-template-columns: 1fr; gap: 2.5rem; }
+  .hero { padding-bottom: 4rem; }
+  section { padding: 3.5rem 0; }
+  .talk { padding-left: 1.25rem; }
+}
+@media (max-width: 560px) {
+  .right > a { display: none; }
+  .mark { white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .say { animation: none; opacity: 1; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#join" data-i18n="skip">Skip to sign-up</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="#top">Reverse Study Buddy</a>
+    <div class="right">
+      <div class="lang" role="group" aria-label="Language / Idioma">
+        <button type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false" lang="es">ES</button>
+      </div>
+      <a href="#join" data-i18n="navJoin">Join the pilot</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <h1 data-i18n="h1">Tell me what I missed.</h1>
+        <p class="lede" data-i18n="lede">A classmate who was absent today. Students tell it what happened in class. Teachers see what stuck.</p>
+        <div class="actions">
+          <a class="btn" href="#join" data-i18n="ctaPrimary">Join the pilot list</a>
+          <a href="#how" data-i18n="ctaSecondary">How it works</a>
+        </div>
+        <p class="small" data-i18n="heroNote">For ESO and Bachillerato. Pilot from January 2027.</p>
+      </div>
+      <div>
+        <div class="talk" role="group" aria-label="Example conversation">
+          <p class="say buddy"><b data-i18n="whoBuddy">Buddy</b><span data-i18n="d1">I was absent today. What did we cover in Biology?</span></p>
+          <p class="say"><b data-i18n="whoYou">You</b><span><span data-i18n="y1a">How plants make food. They make </span><mark data-i18n="y1b">sugar from light, water and carbon dioxide.</mark></span></p>
+          <p class="say buddy"><b data-i18n="whoBuddy2">Buddy</b><span data-i18n="d3">Wait, I thought plants ate soil. Is that wrong?</span></p>
+          <p class="say"><b data-i18n="whoYou2">You</b><span data-i18n="y2">Yes. Soil gives them water and minerals, not food.</span></p>
+        </div>
+        <p class="cap" data-i18n="dCap">The buddy asks. It never gives the answer.</p>
+      </div>
+    </div>
+  </div>
+
+  <section aria-labelledby="why-title">
+    <div class="wrap row">
+      <h2 id="why-title" data-i18n="whyTitle">The problem</h2>
+      <div class="prose">
+        <p class="big" data-i18n="why1">Students cram the night before.</p>
+        <p class="big" data-i18n="why2">Parents fear AI does the thinking.</p>
+        <p class="big" data-i18n="why3">Teachers have no time and no guidance.</p>
+        <p class="small" style="margin-top:1.75rem" data-i18n="whySrc">From interviews with parents, students and a head of department in Spain and Nepal. A small sample, and a start.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-title">
+    <div class="wrap row">
+      <h2 id="how-title" data-i18n="howTitle">The idea</h2>
+      <div>
+        <ul class="how">
+          <li><strong data-i18n="hw1t">The teacher adds the lesson.</strong> <span data-i18n="hw1d">Slides or notes. Nothing new to make.</span></li>
+          <li><strong data-i18n="hw2t">The student recaps it aloud.</strong> <span data-i18n="hw2d">From memory, ten minutes, screen dimmed.</span></li>
+          <li><strong data-i18n="hw3t">A checker keeps it honest.</strong> <span data-i18n="hw3d">It compares the recap with the teacher’s material. The buddy never gives the answer.</span></li>
+          <li><strong data-i18n="hw4t">The teacher sees what stuck.</strong> <span data-i18n="hw4d">Per student, per idea.</span></li>
+        </ul>
+        <p class="bet" data-i18n="bet">Our bet: knowing you must recap tonight is a reason to listen today. The pilot will test it.</p>
+        <div class="tscroll"><table class="cls">
+<caption data-i18n="tHead">What the teacher sees</caption>
+<thead><tr><th scope="col" data-i18n="thStudent">Student</th><th scope="col" data-i18n="r1">What plants take in</th><th scope="col" data-i18n="r2">What chlorophyll does</th><th scope="col" data-i18n="r3">Where the sugar goes</th><th scope="col" data-i18n="thMistake">Repeated mistake</th></tr></thead>
+<tbody>
+<tr><th scope="row">Ana</th><td><span class="dot full" aria-hidden="true"></span><span class="sr" data-i18n="lgFull">Explained</span></td><td><span class="dot full" aria-hidden="true"></span><span class="sr" data-i18n="lgFull">Explained</span></td><td><span class="dot full" aria-hidden="true"></span><span class="sr" data-i18n="lgFull">Explained</span></td><td class="none-cell">–</td></tr>
+<tr><th scope="row">Bilal</th><td><span class="dot full" aria-hidden="true"></span><span class="sr" data-i18n="lgFull">Explained</span></td><td><span class="dot part" aria-hidden="true"></span><span class="sr" data-i18n="lgPart">Partly</span></td><td><span class="dot none" aria-hidden="true"></span><span class="sr" data-i18n="lgNone">Not yet</span></td><td data-i18n="mSoil">Plants eat soil</td></tr>
+<tr><th scope="row">Carla</th><td><span class="dot full" aria-hidden="true"></span><span class="sr" data-i18n="lgFull">Explained</span></td><td><span class="dot full" aria-hidden="true"></span><span class="sr" data-i18n="lgFull">Explained</span></td><td><span class="dot part" aria-hidden="true"></span><span class="sr" data-i18n="lgPart">Partly</span></td><td class="none-cell">–</td></tr>
+<tr><th scope="row">Dev</th><td><span class="dot part" aria-hidden="true"></span><span class="sr" data-i18n="lgPart">Partly</span></td><td><span class="dot none" aria-hidden="true"></span><span class="sr" data-i18n="lgNone">Not yet</span></td><td><span class="dot none" aria-hidden="true"></span><span class="sr" data-i18n="lgNone">Not yet</span></td><td data-i18n="mSoil">Plants eat soil</td></tr>
+<tr><th scope="row">Elena</th><td><span class="dot full" aria-hidden="true"></span><span class="sr" data-i18n="lgFull">Explained</span></td><td><span class="dot part" aria-hidden="true"></span><span class="sr" data-i18n="lgPart">Partly</span></td><td><span class="dot full" aria-hidden="true"></span><span class="sr" data-i18n="lgFull">Explained</span></td><td class="none-cell">–</td></tr>
+<tr><th scope="row">Farid</th><td colspan="4" class="muted" data-i18n="noRecap">No recap yet</td></tr>
+<tr><td colspan="5" class="muted" data-i18n="moreStu">18 more students</td></tr>
+</tbody>
+<tfoot><tr><th scope="row" data-i18n="clsLabel">Whole class (24)</th><td data-i18n="r1n">21 of 24</td><td data-i18n="r2n">17 of 24</td><td data-i18n="r3n">11 of 24</td><td data-i18n="r4n">9 of 24</td></tr></tfoot>
+</table></div>
+<p class="legend"><span class="dot full" aria-hidden="true"></span> <span data-i18n="lgFull">Explained</span> <span class="dot part" aria-hidden="true"></span> <span data-i18n="lgPart">Partly</span> <span class="dot none" aria-hidden="true"></span> <span data-i18n="lgNone">Not yet</span></p>
+        <p class="tnote" data-i18n="tNote">Made-up names and numbers. No rankings, no single score.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="out-title">
+    <div class="wrap row">
+      <h2 id="out-title" data-i18n="outTitle">Left out on purpose</h2>
+      <div class="prose">
+        <p data-i18n="outText">No leaderboards. No streaks. No notifications. No answers handed over. No webcam or emotion tracking. Practice, not marks. Built for GDPR and the EU AI Act.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="join" aria-labelledby="join-title">
+    <div class="wrap row">
+      <div>
+        <h2 id="join-title" data-i18n="joinTitle">Pilot it with us</h2>
+        <p style="margin-top:1rem;max-width:22rem" data-i18n="joinText">Pilots start January 2027. Leave your email.</p>
+      </div>
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="email" data-i18n="emailLabel">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required aria-describedby="status">
+        </div>
+        <div class="field">
+          <label for="role" data-i18n="roleLabel">I am a</label>
+          <select id="role" name="role" required aria-describedby="status">
+            <option value="" data-i18n="roleChoose">Choose one</option>
+            <option value="teacher" data-i18n="roleTeacher">Teacher</option>
+            <option value="school_leader" data-i18n="roleLeader">School leader</option>
+            <option value="parent" data-i18n="roleParent">Parent or guardian</option>
+            <option value="other" data-i18n="roleOther">Other</option>
+          </select>
+        </div>
+        <div class="hp" aria-hidden="true">
+          <label for="website">Website</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="check">
+          <input id="consent" name="consent" type="checkbox" required aria-describedby="status">
+          <label for="consent" data-i18n="consent">I agree to be emailed about the pilot and to have my email stored for that purpose. I can ask to be removed at any time.</label>
+        </div>
+        <button class="btn" id="submit" type="submit" data-i18n="submit">Join the list</button>
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer id="privacy">
+  <div class="wrap">
+    <p><strong data-i18n="privTitle">Your data.</strong> <span data-i18n="priv">We store your email, role, language and consent time, only to write to you about the pilot. We never sell or share it, and we delete it on request. Contact: </span><a href="mailto:CONTACT@EXAMPLE.COM">CONTACT@EXAMPLE.COM</a> <span data-i18n="privWho">([TEAM NAME]).</span></p>
+    <p class="foot" data-i18n="foot">An early-stage project. The product is not available yet.</p>
+  </div>
+</footer>
+
+<script>
+/* The publishable (or legacy anon) key is public by design. Never use a secret or service_role key here. */
+var CONFIG = {
+  SUPABASE_URL: "https://ggitsyasxesgxluxhzxi.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_hJi3gaot_sO3YIGSSveOrg_zcVETHmP",
+  TABLE: "waitlist"
+};
+
+var I18N = {
+  en: {
+    skip: "Skip to sign-up", navJoin: "Join the pilot",
+    h1: "Tell me what I missed.",
+    lede: "A classmate who was absent today. Students tell it what happened in class. Teachers see what stuck.",
+    ctaPrimary: "Join the pilot list", ctaSecondary: "How it works",
+    heroNote: "For ESO and Bachillerato. Pilot from January 2027.",
+    whoBuddy: "Buddy", whoYou: "You", whoBuddy2: "Buddy", whoYou2: "You",
+    d1: "I was absent today. What did we cover in Biology?",
+    y1a: "How plants make food. They make ", y1b: "sugar from light, water and carbon dioxide.",
+    d3: "Wait, I thought plants ate soil. Is that wrong?",
+    y2: "Yes. Soil gives them water and minerals, not food.",
+    dCap: "The buddy asks. It never gives the answer.",
+    whyTitle: "The problem",
+    why1: "Students cram the night before.",
+    why2: "Parents fear AI does the thinking.",
+    why3: "Teachers have no time and no guidance.",
+    howTitle: "The idea",
+    hw1t: "The teacher adds the lesson.", hw1d: "Slides or notes. Nothing new to make.",
+    hw2t: "The student recaps it aloud.", hw2d: "From memory, ten minutes, screen dimmed.",
+    hw3t: "A checker keeps it honest.", hw3d: "It compares the recap with the teacher’s material. The buddy never gives the answer.",
+    hw4t: "The teacher sees what stuck.", hw4d: "Per student, per idea.",
+    thStudent: "Student", thMistake: "Repeated mistake", lgFull: "Explained", lgPart: "Partly", lgNone: "Not yet", mSoil: "Plants eat soil", noRecap: "No recap yet", moreStu: "18 more students", clsLabel: "Whole class (24)",
+    tHead: "What the teacher sees", thIdea: "Idea", thN: "Students who explained it",
+    r1: "What plants take in", r1n: "21 of 24", r2: "What chlorophyll does", r2n: "17 of 24", r3: "Where the sugar goes", r3n: "11 of 24", r4: "Mistake: plants eat soil", r4n: "9 of 24",
+    tNote: "Made-up names and numbers. No rankings, no single score.",
+    outTitle: "Left out on purpose",
+    outText: "No leaderboards. No streaks. No notifications. No answers handed over. No webcam or emotion tracking. Practice, not marks. Built for GDPR and the EU AI Act.",
+    joinTitle: "Pilot it with us", joinText: "Pilots start January 2027. Leave your email.",
+    emailLabel: "Email", roleLabel: "I am a", roleChoose: "Choose one",
+    roleTeacher: "Teacher", roleLeader: "School leader", roleParent: "Parent or guardian", roleOther: "Other",
+    consent: "I agree to be emailed about the pilot and to have my email stored for that purpose. I can ask to be removed at any time.",
+    submit: "Join the list", saving: "Saving…",
+    privTitle: "Your data.",
+    priv: "We store your email, role, language and consent time, only to write to you about the pilot. We never sell or share it, and we delete it on request. Contact: ",
+    privWho: "([TEAM NAME]).",
+    foot: "An early-stage project. The product is not available yet.",
+    ok: "Thanks. You are on the list.", dup: "This email is already on the list.",
+    badEmail: "Enter a valid email address.", noRole: "Choose your role.", noConsent: "Tick the box to continue.",
+    fail: "We could not save your email. Try again in a few minutes.", notConfigured: "The form is not connected yet. Add the Supabase URL and key in the page settings.",
+    whySrc: "From interviews with parents, students and a head of department in Spain and Nepal. A small sample, and a start.",
+    bet: "Our bet: knowing you must recap tonight is a reason to listen today. The pilot will test it.",
+  },
+  es: {
+    skip: "Ir al formulario", navJoin: "Unirme al piloto",
+    h1: "Cuéntame lo que me perdí.",
+    lede: "Un compañero que hoy faltó a clase. El alumnado le cuenta lo que pasó. El profesorado ve qué ha calado.",
+    ctaPrimary: "Unirme a la lista del piloto", ctaSecondary: "Cómo funciona",
+    heroNote: "Para ESO y Bachillerato. Piloto desde enero de 2027.",
+    whoBuddy: "Buddy", whoYou: "Tú", whoBuddy2: "Buddy", whoYou2: "Tú",
+    d1: "Hoy falté. ¿Qué dieron en Biología?",
+    y1a: "Cómo las plantas fabrican su alimento. Hacen ", y1b: "azúcar con luz, agua y dióxido de carbono.",
+    d3: "Espera, yo creía que las plantas comían tierra. ¿Está mal?",
+    y2: "Sí. La tierra les da agua y minerales, no alimento.",
+    dCap: "El compañero pregunta. Nunca da la respuesta.",
+    whyTitle: "El problema",
+    why1: "El alumnado estudia la noche antes.",
+    why2: "Las familias temen que la IA piense por ellos.",
+    why3: "El profesorado no tiene tiempo ni pautas.",
+    howTitle: "La idea",
+    hw1t: "El docente añade la lección.", hw1d: "Presentaciones o apuntes. Nada nuevo que preparar.",
+    hw2t: "El alumno la cuenta en voz alta.", hw2d: "De memoria, diez minutos, pantalla atenuada.",
+    hw3t: "Un verificador mantiene la honestidad.", hw3d: "Compara el relato con el material del docente. El compañero nunca da la respuesta.",
+    hw4t: "El docente ve lo que ha calado.", hw4d: "Por alumno y por idea.",
+    thStudent: "Alumno", thMistake: "Error repetido", lgFull: "Lo explicó", lgPart: "En parte", lgNone: "Aún no", mSoil: "Las plantas comen tierra", noRecap: "Aún sin relato", moreStu: "18 alumnos más", clsLabel: "Toda la clase (24)",
+    tHead: "Lo que ve el docente", thIdea: "Idea", thN: "Alumnos que la explicaron",
+    r1: "Lo que absorben las plantas", r1n: "21 de 24", r2: "Qué hace la clorofila", r2n: "17 de 24", r3: "Adónde va el azúcar", r3n: "11 de 24", r4: "Error: las plantas comen tierra", r4n: "9 de 24",
+    tNote: "Nombres y números inventados. Sin clasificaciones, sin nota única.",
+    outTitle: "Fuera a propósito",
+    outText: "Sin clasificaciones. Sin rachas. Sin notificaciones. Sin dar respuestas. Sin cámara ni detección de emociones. Práctica, no notas. Diseñado para el RGPD y el Reglamento de IA de la UE.",
+    joinTitle: "Pilótelo con nosotros", joinText: "Los pilotos empiezan en enero de 2027. Deje su correo.",
+    emailLabel: "Correo electrónico", roleLabel: "Soy", roleChoose: "Elija una opción",
+    roleTeacher: "Docente", roleLeader: "Responsable de centro", roleParent: "Madre, padre o tutor", roleOther: "Otro",
+    consent: "Acepto que me escriban sobre el piloto y que se guarde mi correo con ese fin. Puedo pedir que lo eliminen en cualquier momento.",
+    submit: "Unirme a la lista", saving: "Guardando…",
+    privTitle: "Sus datos.",
+    priv: "Guardamos su correo, perfil, idioma y la fecha de su consentimiento, solo para escribirle sobre el piloto. Nunca lo vendemos ni lo compartimos, y lo eliminamos si lo pide. Contacto: ",
+    privWho: "([NOMBRE DEL EQUIPO]).",
+    foot: "Un proyecto en fase inicial. El producto todavía no está disponible.",
+    ok: "Gracias. Ya está en la lista.", dup: "Este correo ya está en la lista.",
+    badEmail: "Introduzca un correo válido.", noRole: "Elija su perfil.", noConsent: "Marque la casilla para continuar.",
+    fail: "No se pudo guardar su correo. Inténtelo de nuevo en unos minutos.", notConfigured: "El formulario aún no está conectado. Añada la URL y la clave de Supabase en la configuración de la página.",
+    whySrc: "A partir de entrevistas con familias, alumnado y un jefe de departamento en España y Nepal. Una muestra pequeña, y un comienzo.",
+    bet: "Nuestra apuesta: saber que esa tarde hay que contar la clase es un motivo para escuchar hoy. El piloto lo comprobará.",
+  }
+};
+
+var lang = (navigator.language || "en").toLowerCase().indexOf("es") === 0 ? "es" : "en";
+var statusEl = document.getElementById("status");
+var lastStatus = null;
+function t(key) { return I18N[lang][key]; }
+
+function applyLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.querySelectorAll("[data-i18n]").forEach(function (el) {
+    var v = I18N[l][el.getAttribute("data-i18n")];
+    if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll(".lang button").forEach(function (b) {
+    b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === l));
+  });
+  if (lastStatus) setStatus(lastStatus.key, lastStatus.type);
+}
+function setStatus(key, type) {
+  lastStatus = key ? { key: key, type: type } : null;
+  statusEl.textContent = key ? t(key) : "";
+  statusEl.className = "status" + (type ? " " + type : "");
+}
+document.querySelectorAll(".lang button").forEach(function (b) {
+  b.addEventListener("click", function () { applyLang(b.getAttribute("data-lang")); });
+});
+
+var form = document.getElementById("form");
+var btn = document.getElementById("submit");
+var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  setStatus(null);
+
+  var email = form.email.value.trim().toLowerCase();
+  var role = form.role.value;
+  if (!EMAIL_RE.test(email) || email.length > 254) { setStatus("badEmail", "err"); form.email.focus(); return; }
+  if (!role) { setStatus("noRole", "err"); form.role.focus(); return; }
+  if (!form.consent.checked) { setStatus("noConsent", "err"); form.consent.focus(); return; }
+
+  // Honeypot: bots fill the hidden field. Pretend success and send nothing.
+  if (form.website.value) { setStatus("ok", "ok"); form.reset(); return; }
+
+  if (CONFIG.SUPABASE_URL.indexOf("YOUR-PROJECT-REF") !== -1 || CONFIG.SUPABASE_ANON_KEY === "YOUR-ANON-KEY") {
+    setStatus("notConfigured", "err"); return;
+  }
+
+  btn.disabled = true; btn.setAttribute("aria-busy", "true"); btn.textContent = t("saving");
+
+  var controller = new AbortController();
+  var timer = setTimeout(function () { controller.abort(); }, 10000);
+
+  // New-style keys (sb_publishable_...) are not JWTs, so they go in the apikey header only.
+  // Legacy anon keys are JWTs and also go in Authorization.
+  var headers = { "Content-Type": "application/json", "apikey": CONFIG.SUPABASE_ANON_KEY, "Prefer": "return=minimal" };
+  if (CONFIG.SUPABASE_ANON_KEY.indexOf("sb_") !== 0) headers["Authorization"] = "Bearer " + CONFIG.SUPABASE_ANON_KEY;
+
+  fetch(CONFIG.SUPABASE_URL + "/rest/v1/" + CONFIG.TABLE, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({ email: email, role: role, lang: lang, consent: true }),
+    signal: controller.signal
+  }).then(function (res) {
+    if (res.status === 201 || res.status === 204) { setStatus("ok", "ok"); form.reset(); }
+    else if (res.status === 409) { setStatus("dup", "ok"); form.reset(); }
+    else { setStatus("fail", "err"); }
+  }).catch(function () {
+    setStatus("fail", "err");
+  }).then(function () {
+    clearTimeout(timer);
+    btn.disabled = false; btn.removeAttribute("aria-busy"); btn.textContent = t("submit");
+  });
+});
+
+applyLang(lang);
+</script>
+</body>
+</html>
